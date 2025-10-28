@@ -1,6 +1,8 @@
+FROM python:3.11-slim
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+RUN apt-get install apache2
 COPY app ./app
 ENV APP_HOST=0.0.0.0 APP_PORT=8080
 EXPOSE 8080
