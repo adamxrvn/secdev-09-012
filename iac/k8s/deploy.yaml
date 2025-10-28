@@ -10,11 +10,11 @@ spec:
     metadata:
       labels: { app: s09s12-web }
     spec:
-        securityContext:
-            runAsNonRoot: true
+      securityContext:
+        runAsNonRoot: true
       containers:
         - name: web
-          image: s09s12-app:latest
+          image: s09s12-app:1.0.0
           ports: [{ containerPort: 8080 }]
           securityContext:
             allowPrivilegeEscalation: false
