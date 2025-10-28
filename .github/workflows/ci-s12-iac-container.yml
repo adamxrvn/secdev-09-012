@@ -24,7 +24,11 @@ jobs:
 
       - name: Checkov (iac/)
         run: |
+          echo "Files in /src/iac:"
+          docker run --rm -v $PWD:/src bridgecrew/checkov:latest ls -la /src/iac
+          echo "Running Checkov:"
           docker run --rm -v $PWD:/src bridgecrew/checkov:latest -d /src/iac -o cli
+          echo "Saving JSON:"
           docker run --rm -v $PWD:/src bridgecrew/checkov:latest -d /src/iac -o json > EVIDENCE/S12/checkov.json || true
       - name: Trivy image (JSON)
         uses: aquasecurity/trivy-action@master
