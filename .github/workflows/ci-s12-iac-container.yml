@@ -9,8 +9,6 @@ on:
 jobs:
   s12:
     runs-on: ubuntu-latest
-    env:
-      IMAGE: ghcr.io/${{ github.repository }}/s09s12-app:ci
     permissions:
       contents: read
       packages: write 
@@ -39,7 +37,6 @@ jobs:
           output: 'EVIDENCE/S12/trivy.json'
           ignore-unfixed: true
           severity: 'HIGH,CRITICAL'
-          
 
 
 #       COSIGNING with PUSH TO GHCR
@@ -49,38 +46,21 @@ jobs:
       - name: Log in to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Build, Push, and Attest (SLSA Provenance)
-        id: build
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ghcr.io/${{ github.repository }}/s09s12-app:ci
-          provenance: true
+      - name: Build and push image
+        run: |
+          IMAGE=ghcr.io/${{ github.repository }}/s09s12-app:ci
+          docker build -t $IMAGE .
+          docker push $IMAGE
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.5.0
-        with:
-          cosign-release: 'v2.4.0'
 
-      #- name: Cosign sign image (keyless)
-      #  run: cosign sign -y $IMAGE
+      - name: Cosign sign image (keyless)
+        run: cosign sign -y $IMAGE
 
-      - name: Download attestation
-        env:
-          IMAGE_REF: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
-        run: |
-          echo "Attempting to download attestation for: $IMAGE_REF"
-          cosign download attestation $IMAGE_REF > EVIDENCE/S12/attestation.json
-
-      - name: Verify attestation
-        env:
-          IMAGE_REF: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
-        run: |
-          # Use $IMAGE_REF without surrounding quotes
-          cosign verify-attestation \
-            --certificate-identity-regexp "https://github.com/${{ github.repository }}" \
-            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" $IMAGE_REF
+      - name: Verify image signature
+        run: cosign verify --certificate-identity-regexp "https://github.com/${{ github.repository }}" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" $IMAGE > EVIDENCE/S12/attestation.json
 
       - uses: actions/upload-artifact@v4
         with:
