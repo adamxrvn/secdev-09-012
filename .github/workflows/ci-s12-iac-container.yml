@@ -27,9 +27,14 @@ jobs:
           docker run --rm -v $PWD:/src bridgecrew/checkov:latest -d /src/iac -o json > EVIDENCE/S12/checkov.json || true
 
       - name: Trivy image (JSON)
-        run: |
-          docker run --rm -v $PWD:/work aquasec/trivy:latest image --format json --output /work/EVIDENCE/S12/trivy.json --ignore-unfixed s09s12-app:ci || true
-
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 's09s12-app:ci'
+          format: 'json'
+          output: 'EVIDENCE/S12/trivy.json'
+          ignore-unfixed: true
+          severity: 'HIGH,CRITICAL'
+          
       - uses: actions/upload-artifact@v4
         with:
           name: S12_EVIDENCE
