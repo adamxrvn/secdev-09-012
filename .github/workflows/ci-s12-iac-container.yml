@@ -68,14 +68,14 @@ jobs:
 
       - name: Download attestation
         env:
-          IMAGE_REF: ${{ steps.build.outputs.tags }}
+          IMAGE_REF: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
         run: |
           echo "Attempting to download attestation for: $IMAGE_REF"
           cosign download attestation $IMAGE_REF > EVIDENCE/S12/attestation.json
 
       - name: Verify attestation
         env:
-          IMAGE_REF: ${{ steps.build.outputs.tags }}
+          IMAGE_REF: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
         run: |
           # Use $IMAGE_REF without surrounding quotes
           cosign verify-attestation \
