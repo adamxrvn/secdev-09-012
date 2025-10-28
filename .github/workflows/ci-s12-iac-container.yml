@@ -9,6 +9,8 @@ on:
 jobs:
   s12:
     runs-on: ubuntu-latest
+    env:
+      IMAGE: ghcr.io/${{ github.repository }}/s09s12-app:ci
     permissions:
       contents: read
       packages: write 
