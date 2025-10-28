@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: s09s12-web
+  namespace: app
 spec:
   replicas: 1
   selector:
@@ -12,14 +13,19 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
+      automountServiceAccountToken: false
       containers:
         - name: web
           image: s09s12-app:1.0.0
+          imagePullPolicy: Always
           ports: [{ containerPort: 8080 }]
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             runAsUser: 1000
+            capabilities:
+              drop:
+                - ALL
           resources:
             requests:
               cpu: "100m"
