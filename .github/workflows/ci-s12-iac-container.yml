@@ -40,12 +40,6 @@ jobs:
           ignore-unfixed: true
           severity: 'HIGH,CRITICAL'
           
-      - uses: actions/upload-artifact@v4
-        with:
-          name: S12_EVIDENCE
-          path: EVIDENCE/S12
-
-
 
 
 #       COSIGNING with PUSH TO GHCR
@@ -74,9 +68,18 @@ jobs:
 
       - name: Download attestation
         run: |
-          cosign download attestation --platform=linux/amd64 \
-            ${{ env.IMAGE }} > EVIDENCE/S12/attestation.json
+          IMAGE_REF="${{ steps.build.outputs.tags }}" 
+          echo "Attempting to download attestation for: $IMAGE_REF"
+          cosign download attestation $IMAGE_REF > EVIDENCE/S12/attestation.json
+     
+      - name: Verify attestation
+        run: |
+          IMAGE_REF="${{ steps.build.outputs.tags }}"           
+          cosign verify-attestation \
+            --certificate-identity-regexp "https://github.com/${{ github.repository }}" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" $IMAGE_REF
 
-      - name: Verify image signature
-        run: cosign verify-attestation --certificate-identity-regexp "https://github.com/${{ github.repository }}" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ${{ env.IMAGE }}
-    
+      - uses: actions/upload-artifact@v4
+        with:
+          name: S12_EVIDENCE
+          path: EVIDENCE/S12
