@@ -38,7 +38,10 @@ jobs:
         run: cosign sign -y $IMAGE
 
       - name: Verify image signature
-        run: cosign verify $IMAGE
+        run: cosign verify \
+               --certificate-identity-regexp "https://github.com/${{ github.repository }}" \
+               --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+               $IMAGE
 
 
       - name: Hadolint Dockerfile (JSON)
