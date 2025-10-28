@@ -38,7 +38,7 @@ jobs:
         run: cosign sign -y $IMAGE
 
       - name: Verify image signature
-        run: cosign verify --keyless $IMAGE
+        run: cosign verify $IMAGE
 
 
       - name: Hadolint Dockerfile (JSON)
