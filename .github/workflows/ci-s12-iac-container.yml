@@ -53,12 +53,14 @@ jobs:
       - name: Log in to GHCR
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Build and push image
-        run: |
-          IMAGE=ghcr.io/${{ github.repository }}/s09s12-app:ci
-          docker build -t $IMAGE .
-          docker push $IMAGE
-          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+      - name: Build, Push, and Attest (SLSA Provenance)
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}/s09s12-app:ci
+          provenance: true
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.5.0
@@ -68,14 +70,13 @@ jobs:
       - name: Cosign sign image (keyless)
         run: cosign sign -y $IMAGE
 
+      - name: Download attestation
+        run: |
+          IMAGE=ghcr.io/${{ github.repository }}/s09s12-app:ci
+          cosign download attestation --platform=linux/amd64 \
+            $IMAGE > EVIDENCE/S12/attestation.json
+
       - name: Verify image signature
         run: cosign verify --certificate-identity-regexp "https://github.com/${{ github.repository }}" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" $IMAGE
 
-      - name: Generate Cosign attestation
-        run: |
-          mkdir -p EVIDENCE/S12
-          cosign attest -y \
-            --predicate-type=https://slsa.dev/provenance/v1 \
-            --predicate <(echo '{"buildType":"github-actions","builder":"${{ github.actor }}","repository":"${{ github.repository }}","workflow":"${{ github.workflow }}"}') \
-            --output-file EVIDENCE/S12/attestation.json \
-            $IMAGE
+    
