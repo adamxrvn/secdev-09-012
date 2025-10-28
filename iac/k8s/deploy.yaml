@@ -10,20 +10,10 @@ spec:
     metadata:
       labels: { app: s09s12-web }
     spec:
-        securityContext:
-            runAsNonRoot: true
       containers:
         - name: web
-          image: s09s12-app:1.0.0
+          image: s09s12-app:latest # intentionally 'latest'
           ports: [{ containerPort: 8080 }]
           securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            runAsUser: 1000
-          resources:
-            requests:
-              cpu: "100m"
-              memory: "128Mi"
-            limits:
-              cpu: "250m"
-              memory: "256Mi"
+            runAsUser: 0            # intentionally root
+          resources: {}             # no limits/requests
