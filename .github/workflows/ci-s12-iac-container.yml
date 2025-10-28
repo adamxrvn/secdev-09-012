@@ -69,3 +69,11 @@ jobs:
       - name: Verify image signature
         run: cosign verify --certificate-identity-regexp "https://github.com/${{ github.repository }}" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" $IMAGE
 
+      - name: Generate Cosign attestation
+        run: |
+          mkdir -p EVIDENCE/S12
+          cosign attest -y \
+            --predicate-type=https://slsa.dev/provenance/v1 \
+            --predicate <(echo '{"buildType":"github-actions","builder":"${{ github.actor }}","repository":"${{ github.repository }}","workflow":"${{ github.workflow }}"}') \
+            --output-file EVIDENCE/S12/attestation.json \
+            $IMAGE
