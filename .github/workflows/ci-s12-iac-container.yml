@@ -74,11 +74,9 @@ jobs:
 
       - name: Download attestation
         run: |
-          IMAGE=ghcr.io/${{ github.repository }}/s09s12-app:ci
           cosign download attestation --platform=linux/amd64 \
-            $IMAGE > EVIDENCE/S12/attestation.json
+            ${{ env.IMAGE }} > EVIDENCE/S12/attestation.json
 
       - name: Verify image signature
-        run: cosign verify --certificate-identity-regexp "https://github.com/${{ github.repository }}" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" $IMAGE
-
+        run: cosign verify-attestation --certificate-identity-regexp "https://github.com/${{ github.repository }}" --certificate-oidc-issuer "https://token.actions.githubusercontent.com" ${{ env.IMAGE }}
     
