@@ -69,8 +69,8 @@ jobs:
         with:
           cosign-release: 'v2.4.0'
 
-      - name: Cosign sign image (keyless)
-        run: cosign sign -y $IMAGE
+      #- name: Cosign sign image (keyless)
+      #  run: cosign sign -y $IMAGE
 
       - name: Download attestation
         run: |
