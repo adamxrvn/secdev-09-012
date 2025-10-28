@@ -1,7 +1,7 @@
 FROM python:3.11.14-slim@sha256:8eb5fc663972b871c528fef04be4eaa9ab8ab4539a5316c4b8c133771214a617
 WORKDIR /app
 COPY requirements.txt .
-RUN pip install --upgrade pip && \
+RUN pip install --upgrade pip==24.3.1 && \
     pip install --no-cache-dir -r requirements.txt && \
     rm -rf /root/.cache
 COPY app ./app
